@@ -1,0 +1,270 @@
+
+#include <SPI.h>
+#include <Adafruit_VS1053.h>
+#include <SD.h>
+
+#define BREAKOUT_RESET  9      // VS1053 reset pin (output)
+#define BREAKOUT_CS     10     // VS1053 chip select pin (output)
+#define BREAKOUT_DCS    8      // VS1053 Data/command select pin (output)
+
+#define SHIELD_RESET  -1      // VS1053 reset pin (unused!)
+#define SHIELD_CS     7      // VS1053 chip select pin (output)
+#define SHIELD_DCS    6      // VS1053 Data/command select pin (output)
+#define CARDCS 4     // Card chip select pin
+#define DREQ 3       // VS1053 Data request, ideally an Interrupt pin
+
+Adafruit_VS1053_FilePlayer musicPlayer = 
+
+  Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DCS, DREQ, CARDCS);
+
+int val1 = 0;   // Power Core One        
+int val2 = 0;   // Power Core Two  
+int val3 = 0;   // Power Core Three
+int val4 = 0;   // DEVICE SET TO DEACTIVATE
+int val5 = 0;   // Correct Password
+int val6 = 0;   // Wrong Password
+int val7 = 0;   // Final button to push
+int val8 = 0;   // DEVICE SET TO ACTIVATE
+
+int c1 = A8;    //Power Core One
+int c2 = A9;    //Power Core Two
+int c3 = A10;   //Power Core Three
+int c4 = A11;   //DEVICE SET TO DEACTIVATE
+int c5 = A12;   //Correct Password (Input is from "A5" on Keypad Arduino
+int c6 = A13;   //Wrong Password (Input is from "A4" on Keypad Arduino)
+int c7 = A14;   // Final button to push
+int c8 = A15;   //DEVICE SET TO ACTIVATE
+
+int val11;      //Power Core One
+int val12;      //Power Core Two
+int val13;      //Power Core Three
+int val14;      // DEVICE SET TO DEACTIVATE
+int val15;      //Correct password
+int val16;      //Wrong Password
+int val17;      // Final button
+int val18;      //DEVICE SET TO ACTIVATE
+  
+void setup() {
+  Serial.begin(9600);
+  Serial.println("Adafruit VS1053 Simple Test");
+  pinMode(c1, INPUT);
+  pinMode(c2, INPUT);
+  pinMode(c3, INPUT);
+  pinMode(c4, INPUT); //Device set to deactivate
+  pinMode(c5, INPUT); //Accepted Pass
+  pinMode(c6, INPUT); //Denied Pass
+  pinMode(c7, INPUT); // Final button
+  pinMode(c8, INPUT); //Device set to activate
+  pinMode(49, OUTPUT);
+  pinMode(35, OUTPUT);
+
+  if (! musicPlayer.begin()) { // initialise the music player
+     Serial.println(F("Couldn't find VS1053, do you have the right pins defined?"));
+     while (1);
+  }
+  Serial.println(F("VS1053 found"));
+  SD.begin(CARDCS);                 // initialise the SD card
+  musicPlayer.sineTest(0x44, 500);  //Sound to make sure speakers work
+  printDirectory(SD.open("/"), 0); // list files
+  musicPlayer.setVolume(1,1);      // Set volume for left, right channels. lower numbers == louder volume!
+  musicPlayer.useInterrupt(VS1053_FILEPLAYER_PIN_INT);  // DREQ int
+  }
+
+void loop() {
+  val1 = digitalRead(c1); 
+  val2 = digitalRead(c2);
+  val3 = digitalRead(c3);
+  val4 = digitalRead(c4);
+  val5 = digitalRead(c5);
+  val6 = digitalRead(c6);
+  val7 = digitalRead(c7); //Final button
+  val8 = digitalRead(c8); //Final button
+  
+  Serial.print("val1: ");
+Serial.println(digitalRead(val1));
+
+  Serial.print("val2: ");
+  Serial.println(digitalRead(val2));
+
+  Serial.print("val3: ");
+  Serial.println(digitalRead(val3));
+  
+  Serial.print("val4: ");
+  Serial.println(digitalRead(val4)); //DEVICE SET TO ACTIVATE
+
+  Serial.print("val5: ");
+  Serial.println(digitalRead(val5));
+  
+  Serial.print("val6: ");
+  Serial.println(digitalRead(val6));
+
+Serial.print("val7: ");
+  Serial.println(digitalRead(val7)); //final button
+
+  Serial.print("val8: ");
+  Serial.println(digitalRead(val8)); ////DEVICE SET TO DEACTIVATE
+  
+ 
+ 
+    
+   
+  
+  
+  
+
+
+  
+  if (val11 == 0 && val1 == HIGH) //POWER CORE ONE
+    {
+   
+     musicPlayer.playFullFile("track001.mp3"); //Power Core One Activated
+     val11 = val11 +1 ;
+     //Serial.print("val11: ");
+     //Serial.println(val11);
+   
+ }
+
+  if (val11 == 0 && val1 == LOW) //POWER CORE ONE
+    {
+   
+     musicPlayer.playFullFile("track004.mp3"); //Power Core One Activated
+     
+ }
+    
+ if (val12 == 0 && val2 == HIGH) //POWER CORE TWO
+    {
+   
+     musicPlayer.playFullFile("track002.mp3"); //Power Core One Activated
+     val12 = val12 +1 ;
+     //Serial.print("val12: ");
+     //Serial.println(val12);
+   
+ }
+
+  if (val12 == 0 && val2 == LOW) //POWER CORE TWO
+    {
+   
+     musicPlayer.playFullFile("track005.mp3"); //Power Core One Activated
+   
+ }
+
+ if (val13 == 0 && val3 == HIGH) //POWER CORE THREE
+    {
+   
+     musicPlayer.playFullFile("track003.mp3"); //Power Core One Activated
+     val13 = val13 +1 ;
+     //Serial.print("val13: ");
+     //Serial.println(val13);
+   
+ }
+  if (val13 == 0 && val3 == LOW) //POWER CORE THREE
+    {
+   
+     musicPlayer.playFullFile("track003.mp3"); //Power Core One Activated
+    }
+
+  
+ if(val11 && val12 && val13 == 1)
+    {
+  musicPlayer.playFullFile("track007.mp3");  //Alll Power Cores Activated
+
+  digitalWrite(35,HIGH);
+  delay(500);
+  digitalWrite(35,LOW);
+  
+      Serial.println( "FUN TIME");
+      
+      val11 = val11 +1;
+      val12 = val12 +1;
+      val13 = val13 +1;
+    }
+  delay(100);
+  
+ 
+ 
+ if (val14 == 0 && val4 == HIGH) 
+    {
+   
+     musicPlayer.playFullFile("track012.mp3"); //device has been set to deactivate
+     val14 = val14 +1 ;
+     Serial.print("val4: ");
+     Serial.println(val4);
+     val14 = val14 + 1;
+   
+ }
+
+ 
+
+if (val15 == 0 && val5 == HIGH) // CORRECT PASSWORD
+    {
+   
+     musicPlayer.playFullFile("track008.mp3"); //password accepted
+     musicPlayer.playFullFile("track010.mp3"); //choose to activate or deactivate
+   
+   
+    }
+    
+if (val16 == 0 && val6 == HIGH) //WRONG PASSWORD
+    {
+  musicPlayer.playFullFile("track009.mp3"); //Message will state "Password denied"
+  
+    }
+
+    if (val4 && val7 == HIGH)        //This is the final message pushing red button
+    {  
+    musicPlayer.playFullFile("track014.mp3");
+    Serial.println("TESTER");
+    digitalWrite(35,HIGH);
+    delay(5000000);
+  }
+  
+  if (val8 && val7 == HIGH)        //This is the final message pushing red button
+    {  
+    musicPlayer.playFullFile("track013.mp3");
+    Serial.println("HEY I WORK, I AM WORKING");
+   // digitalWrite(35,HIGH);
+    digitalWrite(49,HIGH);
+    delay(1000);
+    digitalWrite(49,LOW);
+    delay(5000000);
+  }
+  
+
+  if (val18 == 0 && val8 == HIGH)  //device has been set to activate
+    {
+   
+     musicPlayer.playFullFile("track011.mp3"); //DEVICE SET TO ACTIVATE
+     val18 = val18 +1 ;
+     Serial.print("val8: ");
+     Serial.println(val8);
+     val18 = val18 + 1;
+   
+ }
+
+    
+}
+/// File listing helper
+void printDirectory(File dir, int numTabs) {
+   while(true) {
+     
+     File entry =  dir.openNextFile();
+     if (! entry) {
+       // no more files
+       //Serial.println("**nomorefiles**");
+       break;
+     }
+     for (uint8_t i=0; i<numTabs; i++) {
+       Serial.print('\t');
+     }
+     Serial.print(entry.name());
+     if (entry.isDirectory()) {
+       Serial.println("/");
+       printDirectory(entry, numTabs+1);
+     } else {
+       // files have sizes, directories do not
+       Serial.print("\t\t");
+       Serial.println(entry.size(), DEC);
+     }
+     entry.close();
+   }
+}
